@@ -91,3 +91,12 @@ Ideas that would help most:
 - GitHub setup: [github_setup_checklist.md](github_setup_checklist.md)
 - Issues: https://github.com/or4k2l/physical-pattern-matching/issues
 - Discussions: https://github.com/or4k2l/physical-pattern-matching/discussions
+
+- <img width="1590" height="1189" alt="PPM_images_1" src="https://github.com/user-attachments/assets/9313ac04-264b-4e76-8015-6dd44131563f" />
+
+<img width="1590" height="1192" alt="PPM_images_2" src="https://github.com/user-attachments/assets/51ac68c1-11f6-4135-b37a-fddffe8878f9" />
+
+<img width="1660" height="613" alt="PPM_images_3" src="https://github.com/user-attachments/assets/1ef0cb46-2cba-4377-a041-1c92dcce2cb6" />
+
+
+
