@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: "Akbay"
+    given-names: "Yahya"
+    orcid: "https://orcid.org/0000-0000-0000-0000"  # Add your ORCID if you have one
+    alias: "or4k2l"
+title: "Physically-Inspired Robust Pattern Matching: High-Confidence Pattern Recognition via Memristive Crossbars"
+version: 1.0.0
+date-released: 2025-02-05
+url: "https://github.com/or4k2l/physical-pattern-matching"
+repository-code: "https://github.com/or4k2l/physical-pattern-matching"
+keywords:
+  - neuromorphic computing
+  - memristive crossbar
+  - robust pattern recognition
+  - hardware-aware machine learning
+  - autonomous driving
+  - KITTI dataset
+  - implicit regularization
+license: MIT
+abstract: |
+  This repository demonstrates that physical constraints in memristive
+  crossbar arrays provide implicit regularization, leading to 158× higher
+  confidence margins compared to standard neural networks at equal accuracy.
+  We provide systematic benchmarks on the KITTI dataset with ablation studies,
+  theoretical analysis, and reproducible code.

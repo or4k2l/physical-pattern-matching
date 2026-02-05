@@ -1,0 +1,21 @@
+# Core dependencies
+jax>=0.4.0
+jaxlib>=0.4.0
+numpy>=1.21.0
+pandas>=1.3.0
+matplotlib>=3.4.0
+seaborn>=0.11.0
+tqdm>=4.62.0
+Pillow>=8.3.0
+
+# Dataset handling
+kagglehub>=0.3.0
+
+# Optional: For GPU support
+# jax[cuda11_pip]>=0.4.0  # Uncomment for CUDA 11 support
+# jax[cuda12_pip]>=0.4.0  # Uncomment for CUDA 12 support
+
+# Development dependencies (optional)
+# pytest>=7.0.0
+# black>=22.0.0
+# flake8>=4.0.0
