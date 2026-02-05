@@ -230,6 +230,19 @@ This indicates minimal margin for further perturbations in both digital approach
 
 This confirms that **physical saturation prevents the extreme weight values** that make digital models fragile under noise.
 
+### 4.5 Figures
+
+The following figures summarize the benchmark, ablation study, and theoretical analysis.
+
+![Comprehensive comparison](assets/comprehensive_comparison.png)
+Comprehensive comparison across noise levels (physical vs digital vs CNN).
+
+![Ablation analysis](assets/ablation_analysis.png)
+Conductance range ablation: robustness, accuracy, saturation, and weight variability.
+
+![Theoretical analysis](assets/theoretical_analysis.png)
+Theory visuals for saturation, noise sensitivity, and implicit regularization.
+
 ---
 
 ## 5. Discussion
