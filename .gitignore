@@ -67,8 +67,12 @@ venv.bak/
 Thumbs.db
 
 # Project specific
-outputs/
 data/
+outputs/
+checkpoints/
+logs/
+results/
+sweep_results/
 *.csv
 *.png
 !assets/*.png  # Keep visualization examples
@@ -79,3 +83,7 @@ kagglehub/
 
 # JAX cache
 jax_cache/
+
+# TensorFlow
+tensorflow_datasets/
+tfds_data/

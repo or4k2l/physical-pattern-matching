@@ -5,23 +5,27 @@ authors:
     given-names: "Yahya"
     orcid: "https://orcid.org/0000-0000-0000-0000"  # Add your ORCID if you have one
     alias: "or4k2l"
-title: "Truth-Seeking Pattern Matching: High-Confidence Pattern Recognition via Memristive Crossbars"
+title: "Robust Vision: Production-Ready Scalable Training Framework"
 version: 1.0.0
-date-released: 2025-02-05
-url: "https://github.com/or4k2l/truth-seeking-pattern-matching"
-repository-code: "https://github.com/or4k2l/truth-seeking-pattern-matching"
+date-released: 2026-02-06
+url: "https://github.com/or4k2l/Truth-Seeking-Pattern-Matching"
+repository-code: "https://github.com/or4k2l/Truth-Seeking-Pattern-Matching"
 keywords:
-  - neuromorphic computing
-  - memristive crossbar
-  - robust pattern recognition
-  - hardware-aware machine learning
-  - autonomous driving
-  - KITTI dataset
-  - implicit regularization
+  - deep learning
+  - computer vision
+  - robust training
+  - production machine learning
+  - JAX
+  - Flax
+  - scalable training
+  - EMA
+  - label smoothing
+  - margin loss
+  - robustness evaluation
 license: MIT
 abstract: |
-  This repository demonstrates that physical constraints in memristive
-  crossbar arrays provide implicit regularization, leading to 158× higher
-  confidence margins compared to standard neural networks at equal accuracy.
-  We provide systematic benchmarks on the KITTI dataset with ablation studies,
-  theoretical analysis, and reproducible code.
+  A production-ready, scalable framework for training robust vision models.
+  Features include Exponential Moving Average (EMA), label smoothing, margin loss,
+  multi-GPU support, and comprehensive robustness evaluation across multiple noise
+  types. Designed for practitioners who need reliable, maintainable, and 
+  production-grade deep learning code for computer vision applications.
