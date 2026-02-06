@@ -1,0 +1,39 @@
+experiment:
+  name: "margin_lambda_sweep"
+  type: "hyperparameter_search"
+
+search_space:
+  margin_lambda: [0.1, 0.5, 1.0, 5.0, 10.0, 20.0]
+
+model:
+  name: "ResNet18"
+  n_classes: 10
+  features: [64, 128, 256]
+  dropout_rate: 0.3
+
+training:
+  loss_type: "margin"
+  batch_size: 128
+  epochs: 20
+  learning_rate: 0.001
+  optimizer: "adam"
+  ema_enabled: true
+  ema_decay: 0.99
+  dataset_name: "cifar10"
+
+evaluation:
+  noise_types: ["gaussian"]
+  noise_levels: [0.0, 0.3, 0.5]
+  compute_snr: true
+
+output:
+  base_dir: "./results/research/lambda_sweep"
+  generate_comparison_plots: true
+  export_csv: true
+training:
+  loss_type: margin
+  margin_lambda: [0.1, 1.0, 10.0, 20.0]
+  epochs: 30
+  batch_size: 128
+  learning_rate: 0.001
+  checkpoint_dir: ./checkpoints/research/lambda_sweep

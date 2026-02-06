@@ -1,0 +1,34 @@
+model:
+  name: "ResNet18"
+  n_classes: 10
+  features: [64, 128, 256]
+  dropout_rate: 0.3
+
+training:
+  loss_type: "margin"
+  margin_lambda: 10.0
+  batch_size: 128
+  epochs: 30
+  learning_rate: 0.001
+  optimizer: "adam"
+  ema_enabled: true
+  ema_decay: 0.99
+  dataset_name: "cifar10"
+  checkpoint_dir: "./checkpoints/research/margin_lambda_10"
+  save_every: 5
+
+evaluation:
+  noise_types: ["gaussian", "salt_pepper", "fog", "occlusion"]
+  noise_levels: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]
+  compute_snr: true
+  snr_threshold: 10.0
+  output_dir: "./results/research/margin_lambda_10"
+  generate_plots: true
+  save_predictions: true
+training:
+  loss_type: margin
+  margin_lambda: 10.0
+  epochs: 30
+  batch_size: 128
+  learning_rate: 0.001
+  checkpoint_dir: ./checkpoints/research/margin_lambda_10

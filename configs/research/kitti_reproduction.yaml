@@ -1,0 +1,23 @@
+model:
+  name: "LinearClassifier"
+  n_inputs: 4096
+  n_outputs: 2
+
+training:
+  loss_type: "margin"
+  margin_lambda: 10.0
+  batch_size: 32
+  epochs: 30
+  learning_rate: 0.001
+  dataset_name: "kitti_depth"
+  dataset_path: "/path/to/kitti/depth/images"
+  checkpoint_dir: "./checkpoints/research/kitti_reproduction"
+
+evaluation:
+  noise_types: ["gaussian", "salt_pepper", "occlusion"]
+  noise_levels: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]
+  compute_snr: true
+  output_dir: "./results/research/kitti_reproduction"
+  plot_style: "publication"
+  dpi: 300
+  format: ["png", "pdf"]
