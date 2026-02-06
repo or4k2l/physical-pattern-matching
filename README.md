@@ -232,6 +232,15 @@ Ideas that would help most:
 - Issues: https://github.com/or4k2l/physical-pattern-matching/issues
 - Discussions: https://github.com/or4k2l/physical-pattern-matching/discussions
 
+<img width="1590" height="1199" alt="PPM_images_x" src="https://github.com/user-attachments/assets/1d9d31bf-50cd-4a54-a285-7648338b4249" />
+
+<img width="1589" height="1198" alt="PPM_images_x1" src="https://github.com/user-attachments/assets/348cc407-c371-46ce-8338-7b6f9c09799c" />
+
+<img width="1590" height="1198" alt="PPM_images_x2" src="https://github.com/user-attachments/assets/088223c2-8f59-427e-88c5-0d8b0936007b" />
+
+<img width="1680" height="1024" alt="PPM_images_x3" src="https://github.com/user-attachments/assets/ac5b1bf8-0e05-4744-a1e9-37fa292adf58" />
+
+
 
 
 
