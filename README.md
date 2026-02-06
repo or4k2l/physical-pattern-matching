@@ -1,8 +1,12 @@
 # Robust Vision: Production-Ready Scalable Training Framework
 
+[![CI/CD](https://github.com/or4k2l/robust-vision/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/or4k2l/robust-vision/actions)
+[![codecov](https://codecov.io/gh/or4k2l/robust-vision/branch/main/graph/badge.svg)](https://codecov.io/gh/or4k2l/robust-vision)
+[![PyPI version](https://badge.fury.io/py/robust-vision.svg)](https://badge.fury.io/py/robust-vision)
+[![Docker](https://img.shields.io/docker/v/or4k2l/robust-vision?label=docker)](https://hub.docker.com/r/or4k2l/robust-vision)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![JAX](https://img.shields.io/badge/JAX-0.4+-orange.svg)](https://github.com/google/jax)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 A production-ready, scalable framework for training robust vision models with advanced techniques including EMA, label smoothing, margin loss, and multi-GPU support.
 
@@ -23,6 +27,27 @@ A production-ready, scalable framework for training robust vision models with ad
 
 ### Installation
 
+#### Option 1: PyPI (Recommended)
+
+```bash
+pip install robust-vision
+```
+
+#### Option 2: Docker
+
+```bash
+# Pull the latest image
+docker pull or4k2l/robust-vision:latest
+
+# Run training
+docker run --gpus all or4k2l/robust-vision:latest
+
+# Or use docker-compose for development
+docker-compose up
+```
+
+#### Option 3: From Source
+
 ```bash
 git clone https://github.com/or4k2l/robust-vision.git
 cd robust-vision
@@ -33,12 +58,23 @@ pip install -e .
 ### Train a Model
 
 ```bash
+# Using CLI (after pip install)
+robust-vision-train --config configs/baseline.yaml
+
+# Or directly with Python
 python scripts/train.py --config configs/baseline.yaml
 ```
 
 ### Evaluate Robustness
 
 ```bash
+# Using CLI
+robust-vision-eval \
+  --checkpoint ./checkpoints/baseline/best_checkpoint_18 \
+  --config configs/baseline.yaml \
+  --output ./results
+
+# Or directly with Python
 python scripts/eval_robustness.py \
   --checkpoint ./checkpoints/baseline/best_checkpoint_18 \
   --config configs/baseline.yaml \
@@ -215,7 +251,7 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for gui
 
 ## 📄 License
 
-This project is licensed under the MIT License - see [LICENSE](LICENSE) for details.
+This project is licensed under the GNU Affero General Public License v3 - see [LICENSE](LICENSE) for details.
 
 ## 📖 Citation
 

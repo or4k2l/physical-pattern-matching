@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  robust-vision:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: robust-vision:latest
+    container_name: robust-vision-dev
+    
+    # Enable GPU support (requires nvidia-docker)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    
+    # Mount local directories for development
+    volumes:
+      - ./data:/app/data
+      - ./checkpoints:/app/checkpoints
+      - ./results:/app/results
+      - ./configs:/app/configs
+    
+    # Environment variables
+    environment:
+      - JAX_PLATFORM_NAME=gpu
+      - PYTHONUNBUFFERED=1
+    
+    # Expose TensorBoard port
+    ports:
+      - "6006:6006"
+    
+    # Default command (can be overridden)
+    command: python scripts/train.py --config configs/baseline.yaml
+    
+    # Keep container running for interactive use
+    # Uncomment the line below and comment out the command above
+    # command: tail -f /dev/null
+    
+    # Restart policy
+    restart: unless-stopped
+
+  # Optional: TensorBoard service
+  tensorboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: robust-vision:latest
+    container_name: robust-vision-tensorboard
+    
+    volumes:
+      - ./logs:/app/logs
+      - ./checkpoints:/app/checkpoints
+    
+    ports:
+      - "6007:6006"
+    
+    command: tensorboard --logdir=/app/logs --host=0.0.0.0 --port=6006
+    
+    restart: unless-stopped
