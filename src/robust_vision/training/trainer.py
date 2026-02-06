@@ -87,8 +87,16 @@ class ProductionTrainer:
         Returns:
             Training state
         """
-        # Initialize parameters
-        params = self.model.init(rng, jnp.ones(input_shape), training=False)
+        # Initialize parameters and batch_stats
+        variables = self.model.init(rng, jnp.ones(input_shape), training=False)
+        
+        # Extract params and batch_stats if they exist
+        if isinstance(variables, dict) and 'params' in variables:
+            params = variables['params']
+            batch_stats = variables.get('batch_stats', {})
+        else:
+            params = variables
+            batch_stats = {}
         
         # Create optimizer
         if self.weight_decay > 0:
@@ -99,12 +107,13 @@ class ProductionTrainer:
         else:
             tx = optax.adam(learning_rate=self.learning_rate)
         
-        # Create training state with EMA
+        # Create training state with EMA and batch_stats
         state = TrainStateWithEMA.create_with_ema(
             apply_fn=self.model.apply,
             params=params,
             tx=tx,
-            ema_decay=self.ema_decay
+            ema_decay=self.ema_decay,
+            batch_stats=batch_stats
         )
         
         return state
@@ -115,7 +124,8 @@ class ProductionTrainer:
         batch: Tuple[jnp.ndarray, jnp.ndarray],
         num_classes: int,
         loss_type: str,
-        loss_kwargs: Dict
+        loss_kwargs: Dict,
+        dropout_rng: Optional[jax.random.PRNGKey] = None
     ) -> Tuple[TrainStateWithEMA, Dict[str, float]]:
         """
         Single training step.
@@ -126,6 +136,7 @@ class ProductionTrainer:
             num_classes: Number of classes
             loss_type: Loss function type
             loss_kwargs: Loss function arguments
+            dropout_rng: PRNG key for dropout
             
         Returns:
             Updated state and metrics dict
@@ -133,18 +144,51 @@ class ProductionTrainer:
         images, labels = batch
         
         def loss_fn(params):
-            logits = state.apply_fn(params, images, training=True)
+            # Check if model has batch_stats
+            has_batch_stats = state.batch_stats and len(state.batch_stats) > 0
+            
+            if has_batch_stats:
+                # Pass batch_stats as mutable
+                variables = {'params': params, 'batch_stats': state.batch_stats}
+                rngs = {'dropout': dropout_rng} if dropout_rng is not None else None
+                
+                if rngs:
+                    output = state.apply_fn(
+                        variables, images, training=True,
+                        mutable=['batch_stats'], rngs=rngs
+                    )
+                else:
+                    output = state.apply_fn(
+                        variables, images, training=True,
+                        mutable=['batch_stats']
+                    )
+                
+                logits, new_model_state = output
+                new_batch_stats = new_model_state['batch_stats']
+            else:
+                # No batch_stats
+                rngs = {'dropout': dropout_rng} if dropout_rng is not None else None
+                
+                if rngs:
+                    logits = state.apply_fn(params, images, training=True, rngs=rngs)
+                else:
+                    logits = state.apply_fn(params, images, training=True)
+                
+                new_batch_stats = {}
+            
             loss = combined_loss(
                 logits, labels, num_classes, 
                 loss_type=loss_type, **loss_kwargs
             )
-            return loss, logits
+            return loss, (logits, new_batch_stats)
         
         # Compute gradients
-        (loss, logits), grads = jax.value_and_grad(loss_fn, has_aux=True)(state.params)
+        (loss, (logits, new_batch_stats)), grads = jax.value_and_grad(
+            loss_fn, has_aux=True
+        )(state.params)
         
-        # Update parameters
-        state = state.apply_gradients(grads=grads)
+        # Update parameters and batch_stats
+        state = state.apply_gradients(grads=grads, batch_stats=new_batch_stats)
         
         # Update EMA
         state = state.apply_ema_update()
@@ -183,8 +227,14 @@ class ProductionTrainer:
         # Use EMA parameters if available and requested
         params = state.ema_params if (use_ema and state.ema_params is not None) else state.params
         
-        # Forward pass
-        logits = state.apply_fn(params, images, training=False)
+        # Forward pass with batch_stats
+        has_batch_stats = state.batch_stats and len(state.batch_stats) > 0
+        
+        if has_batch_stats:
+            variables = {'params': params, 'batch_stats': state.batch_stats}
+            logits = state.apply_fn(variables, images, training=False)
+        else:
+            logits = state.apply_fn(params, images, training=False)
         
         # Compute metrics
         loss = combined_loss(
@@ -204,35 +254,53 @@ class ProductionTrainer:
         self,
         state: TrainStateWithEMA,
         train_ds,
-        epoch: int
+        epoch: int,
+        rng: Optional[jax.random.PRNGKey] = None
     ) -> Tuple[TrainStateWithEMA, Dict[str, float]]:
         """
         Train for one epoch.
         
         Args:
             state: Training state
-            train_ds: Training dataset
+            train_ds: Training dataset (iterator)
             epoch: Current epoch number
+            rng: Random key for dropout
             
         Returns:
             Updated state and average metrics
         """
         batch_metrics = []
         
+        # Initialize RNG if not provided
+        if rng is None:
+            rng = jax.random.PRNGKey(epoch)
+        
         # Create progress bar
         pbar = tqdm(train_ds, desc=f"Epoch {epoch}", leave=False)
         
         for batch in pbar:
-            # Convert to numpy if needed
-            if hasattr(batch, 'numpy'):
-                images, labels = batch[0].numpy(), batch[1].numpy()
-            else:
-                images, labels = batch
+            # Split key for dropout
+            rng, dropout_key = jax.random.split(rng)
             
-            # Training step
+            # Handle both dict (from TF.Data) and tuple (from numpy arrays) formats
+            if isinstance(batch, dict):
+                images = jnp.asarray(batch['image'])
+                labels = jnp.asarray(batch['label'])
+            else:
+                # Convert to numpy if needed
+                if hasattr(batch, 'numpy'):
+                    images, labels = batch[0].numpy(), batch[1].numpy()
+                else:
+                    images, labels = batch
+                
+                images = jnp.asarray(images)
+                labels = jnp.asarray(labels)
+            
+            # Training step with dropout key
             state, metrics = self.train_step(
                 state, (images, labels),
-                self.num_classes, self.loss_type, self.loss_kwargs
+                self.num_classes, self.loss_type, self.loss_kwargs,
+                dropout_rng=dropout_key
             )
             
             batch_metrics.append(metrics)
@@ -262,7 +330,7 @@ class ProductionTrainer:
         
         Args:
             state: Training state
-            eval_ds: Evaluation dataset
+            eval_ds: Evaluation dataset (iterator)
             use_ema: Whether to use EMA parameters
             
         Returns:
@@ -271,11 +339,19 @@ class ProductionTrainer:
         batch_metrics = []
         
         for batch in eval_ds:
-            # Convert to numpy if needed
-            if hasattr(batch, 'numpy'):
-                images, labels = batch[0].numpy(), batch[1].numpy()
+            # Handle both dict (from TF.Data) and tuple (from numpy arrays) formats
+            if isinstance(batch, dict):
+                images = jnp.asarray(batch['image'])
+                labels = jnp.asarray(batch['label'])
             else:
-                images, labels = batch
+                # Convert to numpy if needed
+                if hasattr(batch, 'numpy'):
+                    images, labels = batch[0].numpy(), batch[1].numpy()
+                else:
+                    images, labels = batch
+                
+                images = jnp.asarray(images)
+                labels = jnp.asarray(labels)
             
             # Evaluation step
             metrics = self.eval_step(
@@ -329,8 +405,11 @@ class ProductionTrainer:
         for epoch in range(1, num_epochs + 1):
             epoch_start = time.time()
             
-            # Train
-            state, train_metrics = self.train_epoch(state, train_ds, epoch)
+            # Split RNG for this epoch
+            rng, epoch_rng = jax.random.split(rng)
+            
+            # Train with RNG for dropout
+            state, train_metrics = self.train_epoch(state, train_ds, epoch, rng=epoch_rng)
             
             # Log training metrics
             self.log_fn(
@@ -364,10 +443,12 @@ class ProductionTrainer:
         return state
     
     def save_checkpoint(self, state: TrainStateWithEMA, step: int, prefix: str = ''):
-        """Save checkpoint."""
+        """Save checkpoint with absolute path."""
         if self.checkpoint_dir:
-            checkpoint_dir = Path(self.checkpoint_dir)
+            # Use absolute path for checkpoint directory
+            checkpoint_dir = Path(self.checkpoint_dir).resolve()
             checkpoint_dir.mkdir(parents=True, exist_ok=True)
+            
             checkpoints.save_checkpoint(
                 ckpt_dir=str(checkpoint_dir),
                 target=state,
@@ -377,10 +458,11 @@ class ProductionTrainer:
             )
     
     def load_checkpoint(self, state: TrainStateWithEMA, step: Optional[int] = None) -> TrainStateWithEMA:
-        """Load checkpoint."""
+        """Load checkpoint with absolute path."""
         if self.checkpoint_dir:
+            checkpoint_dir = Path(self.checkpoint_dir).resolve()
             return checkpoints.restore_checkpoint(
-                ckpt_dir=self.checkpoint_dir,
+                ckpt_dir=str(checkpoint_dir),
                 target=state,
                 step=step
             )
