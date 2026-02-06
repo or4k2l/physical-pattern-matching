@@ -39,7 +39,7 @@ class TestScalableDataLoader:
         for batch in ds.take(1):
             images, labels = batch
             assert images.shape[0] == 32  # batch size
-            assert images.shape[1:] == (32, 32, 3)  # image shape
+            assert tuple(images.shape[1:]) == (32, 32, 3)  # image shape
             assert labels.shape[0] == 32
 
 

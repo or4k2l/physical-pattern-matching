@@ -45,10 +45,14 @@ class TestProductionCNN:
     def test_training_mode(self, model, test_input):
         """Test model works in training mode."""
         rng = jax.random.PRNGKey(0)
-        params = model.init(rng, test_input, training=False)
+        variables = model.init(rng, test_input, training=False)
         
-        # Forward pass in training mode
-        logits = model.apply(params, test_input, training=True, rngs={'dropout': rng})
+        # Forward pass in training mode with mutable batch_stats
+        output = model.apply(variables, test_input, training=True, 
+                           mutable=['batch_stats'], rngs={'dropout': rng})
+        
+        # Extract logits and updated batch_stats
+        logits, updated_vars = output
         
         # Should produce valid output
         assert logits.shape == (4, 10)

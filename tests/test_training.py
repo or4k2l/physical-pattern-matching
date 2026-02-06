@@ -128,7 +128,7 @@ class TestTrainStateWithEMA:
         initial_ema = state.ema_params
         
         # Modify params (simulate a training step)
-        new_params = jax.tree_map(lambda x: x + 0.01, state.params)
+        new_params = jax.tree.map(lambda x: x + 0.01, state.params)
         state = state.replace(params=new_params)
         
         # Update EMA
@@ -160,17 +160,19 @@ class TestTrainStateWithEMA:
         )
         
         # Create dummy batch
-        images = jax.random.normal(rng, (8, 32, 32, 3))
-        labels = jax.random.randint(rng, (8,), 0, 10)
+        rng, data_rng, dropout_rng = jax.random.split(rng, 3)
+        images = jax.random.normal(data_rng, (8, 32, 32, 3))
+        labels = jax.random.randint(data_rng, (8,), 0, 10)
         batch = (images, labels)
         
-        # Training step
+        # Training step with dropout_rng
         new_state, metrics = ProductionTrainer.train_step(
             state=state,
             batch=batch,
             num_classes=10,
             loss_type="label_smoothing",
-            loss_kwargs={"smoothing": 0.1}
+            loss_kwargs={"smoothing": 0.1},
+            dropout_rng=dropout_rng
         )
         
         # Check state was updated
