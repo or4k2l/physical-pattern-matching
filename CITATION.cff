@@ -22,7 +22,7 @@ keywords:
   - label smoothing
   - margin loss
   - robustness evaluation
-license: MIT
+license: Apache-2.0
 abstract: |
   A production-ready, scalable framework for training robust vision models.
   Features include Exponential Moving Average (EMA), label smoothing, margin loss,
